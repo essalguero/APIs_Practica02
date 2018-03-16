@@ -3,17 +3,12 @@
 #include "../lib/glew/glew.h"
 
 #include <iostream>
+#include <memory>
 
-
-using namespace std;
 
 class Shader
 {
 public:
-	Shader(const string & stringVertexShader, const string & stringFragmentShader);
-
-	~Shader();
-
 
 	// Devuelve el identificador de OpenGL del programa
 	inline uint32_t	getId() const { return id; };
@@ -38,6 +33,17 @@ public:
 	void setVec4(int loc, const glm::vec4& vec);
 	void setMatrix(int loc, const glm::mat4& matrix);
 
+
+	static std::shared_ptr<Shader> create(const std::string& vertexCode, const std::string& fragmentCode);
+
+protected:
+
+
+	Shader(const std::string & stringVertexShader, const std::string & stringFragmentShader);
+	~Shader();
+	static void destroy(Shader* p) {
+		delete p;
+	}
 
 
 private:

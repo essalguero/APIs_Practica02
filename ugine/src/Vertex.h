@@ -3,8 +3,8 @@
 #include "common.h"
 
 
-typedef struct
-{
+class Vertex {
+public:
 	glm::vec3 position;
-} Vertex;
+};
 

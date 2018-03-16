@@ -4,11 +4,22 @@
 
 #include <string>
 
+using namespace std;
+
 Shader::~Shader()
 {
 	if (id != -1)
 		glDeleteProgram(id);
 
+}
+
+
+std::shared_ptr<Shader> Shader::create(const std::string& vertexCode, const std::string& fragmentCode) {
+	std::shared_ptr<Shader> p(new Shader(vertexCode, fragmentCode), destroy);
+	if (strcmp(p->error, "") != 0) {
+		p = nullptr;
+	}
+	return p;
 }
 
 // Gets as parameter the code of the shaders to compile

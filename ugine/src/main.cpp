@@ -2,9 +2,6 @@
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
-#include "../lib/glew/glew.h"
-#include "../lib/glfw3/glfw3.h"
-#include "common.h"
 //#include <array>
 #include <fstream>
 #include <iostream>
@@ -12,9 +9,17 @@
 
 #include <vector>
 
+#include <memory>
+
+
+#include "../lib/glew/glew.h"
+#include "../lib/glfw3/glfw3.h"
+#include "common.h"
 #include "Shader.h"
 #include "Vertex.h"
 #include "Buffer.h"
+
+#include "State.h"
 
 #define FULLSCREEN false
 
@@ -67,15 +72,28 @@ int main(int, char**) {
 		return -1;
 
 
-	Shader shaderProgram(readString("data/shader.vert"), readString("data/shader.frag"));
+	State state;
+	
+	state.defaultShader = Shader::create(readString("data/shader.vert"), readString("data/shader.frag"));
+		
+		
+	//Shader.create(readString("data/shader.vert"), readString("data/shader.frag"));
 
-	if (strcmp(shaderProgram.getError(), "") != 0)
+	//Shader shaderProgram(readString("data/shader.vert"), readString("data/shader.frag"));
+
+	/*if (strcmp(shaderProgram.getError(), "") != 0)
 	{
 		cout << shaderProgram.getError() << endl;
 		return -1;
+	}*/
+
+	if (strcmp(state.defaultShader->getError(), "") != 0)
+	{
+		cout << state.defaultShader->getError() << endl;
+		return -1;
 	}
 
-	shaderProgram.use();
+	state.defaultShader->use();
 
 
 	// Crear el Buffer que contiene los datos de un triángulo
@@ -131,7 +149,7 @@ int main(int, char**) {
 		anguloRotacionRads += (glm::radians(32.0f) * deltaTime);
 
 		glm::mat4 mvpMatrix;
-		int matrixLocation = shaderProgram.getLocation("mvpMatrix");
+		int matrixLocation = state.defaultShader->getLocation("mvpMatrix");
 
 
 		// Crear matriz de proyeccion
@@ -170,13 +188,13 @@ int main(int, char**) {
 				mvpMatrix = viewProjectionMatrix * mvpMatrix;
 
 				// Pass the MVP matrix to the shader program
-				shaderProgram.setMatrix(matrixLocation, mvpMatrix);
+				state.defaultShader->setMatrix(matrixLocation, mvpMatrix);
 
 
 
 
 
-				bufferDatos.draw(shaderProgram);
+				bufferDatos.draw(state.defaultShader);
 			}
 		}
 

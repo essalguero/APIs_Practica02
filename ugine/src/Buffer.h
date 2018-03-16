@@ -37,7 +37,8 @@ public:
 
 	~Buffer();
 
-	void draw(const Shader& shader) const;
+	//void draw(const Shader& shader) const;
+	void draw(const std::shared_ptr<Shader> & shader) const;
 
 private:
 
