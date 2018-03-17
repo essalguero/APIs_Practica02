@@ -74,7 +74,7 @@ int main(int, char**) {
 
 	State state;
 	
-	state.defaultShader = Shader::create(readString("data/shader.vert"), readString("data/shader.frag"));
+	state.defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
 		
 		
 	//Shader.create(readString("data/shader.vert"), readString("data/shader.frag"));
