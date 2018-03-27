@@ -141,10 +141,6 @@ int main(int, char**) {
 		// Update the rotation angle
 		anguloRotacionRads += (glm::radians(32.0f) * deltaTime);
 
-		glm::mat4 mvpMatrix;
-		int matrixLocation = State::defaultShader->getLocation("mvpMatrix");
-
-
 		// Crear matriz de proyeccion
 		glm::mat4 projectionMatrix = glm::perspective(45.0f, 
 			static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
@@ -152,9 +148,6 @@ int main(int, char**) {
 		// Crear matriz de vista
 		glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 6.0f), 
 			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		// Matriz Vista Proyeccion
-		glm::mat4 viewProjectionMatrix = projectionMatrix * viewMatrix;
 
 		// Transformaciones para calcular la matriz del modelo
 
@@ -172,24 +165,12 @@ int main(int, char**) {
 				// Matriz de traslacion
 				glm::mat4 translationMatrix = glm::translate(glm::mat4(), glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
 
-				// Aplicar transformaciones al objeto
-
-				// 1º rotacion, despues traslacion (1º sería la operación de escalado, pero no se aplica en este ejercicio)
-				//mvpMatrix = translationMatrix * rotationMatrix;
-
-				// Multiplicar por la matriz de vista y proyeccion para obtener la matriz MVP
-				//mvpMatrix = viewProjectionMatrix * mvpMatrix;
-
+				// Store the needed Matrices in the class State
 				State::modelMatrix = translationMatrix * rotationMatrix;
 				State::viewMatrix = viewMatrix;
 				State::projectionMatrix = projectionMatrix;
 
-				// Pass the MVP matrix to the shader program
-				State::defaultShader->setMatrix(matrixLocation, mvpMatrix);
-
-
-
-				//bufferDatos->draw(State::defaultShader);
+				//Draw the object
 				triangleMesh.draw();
 			}
 		}
