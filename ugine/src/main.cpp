@@ -18,6 +18,7 @@
 #include "Shader.h"
 #include "Vertex.h"
 #include "Buffer.h"
+#include "Mesh.h"
 
 #include "State.h"
 
@@ -72,28 +73,18 @@ int main(int, char**) {
 		return -1;
 
 
-	State state;
+	//State state;
 	
-	state.defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
-		
-		
-	//Shader.create(readString("data/shader.vert"), readString("data/shader.frag"));
+	//state.defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
+	State::defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
 
-	//Shader shaderProgram(readString("data/shader.vert"), readString("data/shader.frag"));
-
-	/*if (strcmp(shaderProgram.getError(), "") != 0)
+	if (strcmp(State::defaultShader->getError(), "") != 0)
 	{
-		cout << shaderProgram.getError() << endl;
-		return -1;
-	}*/
-
-	if (strcmp(state.defaultShader->getError(), "") != 0)
-	{
-		cout << state.defaultShader->getError() << endl;
+		cout << State::defaultShader->getError() << endl;
 		return -1;
 	}
 
-	state.defaultShader->use();
+	State::defaultShader->use();
 
 
 	// Crear el Buffer que contiene los datos de un triángulo
@@ -114,8 +105,10 @@ int main(int, char**) {
 	indices.push_back(2);
 
 
-	Buffer bufferDatos(vertices, indices);
+	shared_ptr<Buffer> bufferDatos = make_shared<Buffer>(vertices, indices);
 
+	Mesh triangleMesh;
+	triangleMesh.addBuffer(bufferDatos);
 	//Bucle principal
 
 	float anguloRotacionRads = 0.0f;
@@ -149,7 +142,7 @@ int main(int, char**) {
 		anguloRotacionRads += (glm::radians(32.0f) * deltaTime);
 
 		glm::mat4 mvpMatrix;
-		int matrixLocation = state.defaultShader->getLocation("mvpMatrix");
+		int matrixLocation = State::defaultShader->getLocation("mvpMatrix");
 
 
 		// Crear matriz de proyeccion
@@ -182,19 +175,22 @@ int main(int, char**) {
 				// Aplicar transformaciones al objeto
 
 				// 1º rotacion, despues traslacion (1º sería la operación de escalado, pero no se aplica en este ejercicio)
-				mvpMatrix = translationMatrix * rotationMatrix;
+				//mvpMatrix = translationMatrix * rotationMatrix;
 
 				// Multiplicar por la matriz de vista y proyeccion para obtener la matriz MVP
-				mvpMatrix = viewProjectionMatrix * mvpMatrix;
+				//mvpMatrix = viewProjectionMatrix * mvpMatrix;
+
+				State::modelMatrix = translationMatrix * rotationMatrix;
+				State::viewMatrix = viewMatrix;
+				State::projectionMatrix = projectionMatrix;
 
 				// Pass the MVP matrix to the shader program
-				state.defaultShader->setMatrix(matrixLocation, mvpMatrix);
+				State::defaultShader->setMatrix(matrixLocation, mvpMatrix);
 
 
 
-
-
-				bufferDatos.draw(state.defaultShader);
+				//bufferDatos->draw(State::defaultShader);
+				triangleMesh.draw();
 			}
 		}
 
