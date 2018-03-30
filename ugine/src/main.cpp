@@ -19,11 +19,15 @@
 #include "Vertex.h"
 #include "Buffer.h"
 #include "Mesh.h"
+#include "Model.h"
+#include "Camera.h"
+#include "World.h"
 
 #include "State.h"
 
 #define FULLSCREEN false
 
+const float ROTATION_SPEED = 32.0f;
 
 std::string readString(const char* filename) {
 	std::ifstream f(filename, std::ios_base::binary);
@@ -73,9 +77,7 @@ int main(int, char**) {
 		return -1;
 
 
-	//State state;
-	
-	//state.defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
+	// Store the Shader in the global object State
 	State::defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
 
 	if (strcmp(State::defaultShader->getError(), "") != 0)
@@ -84,7 +86,7 @@ int main(int, char**) {
 		return -1;
 	}
 
-	State::defaultShader->use();
+	//State::defaultShader->use();
 
 
 	// Crear el Buffer que contiene los datos de un triángulo
@@ -105,16 +107,46 @@ int main(int, char**) {
 	indices.push_back(2);
 
 
-	shared_ptr<Buffer> bufferDatos = make_shared<Buffer>(vertices, indices);
+	shared_ptr<Buffer> bufferDatos = Buffer::create(vertices, indices);
+	if (strcmp(bufferDatos->getError(), "") != 0)
+	{
+		cout << bufferDatos->getError() << endl;
+		return -1;
+	}
 
-	Mesh triangleMesh;
-	triangleMesh.addBuffer(bufferDatos);
-	//Bucle principal
+	shared_ptr<Mesh> triangleMesh = make_shared<Mesh>();
+	Model triangleModel(triangleMesh);
+	triangleMesh->addBuffer(bufferDatos);
 
-	float anguloRotacionRads = 0.0f;
+	shared_ptr<Camera> camera = make_shared<Camera>();
+	camera->setPosition(glm::vec3(0.0f, 0.0f, 6.0f));
+	camera->setClearColor(glm::vec3(0, 0, 0));
+
+	World world;
+	//world.addEntity(std::dynamic_pointer_cast<Entity, Camera>(camera));
+	world.addEntity(camera);
 
 	
+	float anguloRotacionRads = glm::radians(ROTATION_SPEED);
+	glm::vec3 scaleVector(1.0f, 1.0f, 1.0f);
+	glm::vec3 rotationVector(0.0f, 0.0f, 0.0f);
 
+	vector<shared_ptr<Model>> trianglesVector;
+
+	for (int x = -3; x <= 3; x += 3) {
+		for (int z = 0; z >= -6; z -= 3) {
+			
+			shared_ptr<Model> triangle = make_shared<Model>(triangleMesh);
+			triangle->setScale(scaleVector);
+			triangle->setRotation(rotationVector);
+			triangle->setPosition(glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
+
+			world.addEntity(triangle);
+			trianglesVector.push_back(triangle);
+		}
+	}
+
+	// Bucle principal
 	float lastTime = static_cast<float>(glfwGetTime());
 	while ( !glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE) ) {
 		// update delta time
@@ -131,23 +163,22 @@ int main(int, char**) {
 		ss << screenWidth << "x" << screenHeight;
 		glfwSetWindowTitle(window, ss.str().c_str());
 
-		// clear screen
-		glViewport(0, 0, screenWidth, screenHeight);
-		glScissor(0, 0, screenWidth, screenHeight);
-		glClearColor(0, 0, 0, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Update viewport in case the screen has been resized
+		camera->setViewport(glm::ivec4(0, 0, screenWidth, screenHeight));
 
-
-		// Update the rotation angle
-		anguloRotacionRads += (glm::radians(32.0f) * deltaTime);
-
-		// Crear matriz de proyeccion
+		// Set projection matrix in case the screen has been resized
 		glm::mat4 projectionMatrix = glm::perspective(45.0f, 
 			static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+		camera->setProjection(projectionMatrix);
+
+		// Rotar todos los triangulos
+		for (auto triangle : trianglesVector)
+		{
+			triangle->setRotation(glm::vec3(0.0f, anguloRotacionRads, 0.0f));
+		}
 
 		// Crear matriz de vista
-		glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 6.0f), 
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 6.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Transformaciones para calcular la matriz del modelo
 
@@ -155,15 +186,20 @@ int main(int, char**) {
 		// No se esta realizando escalado de objetos
 
 		// Matriz de Rotacion
-		glm::mat4 rotationMatrix = glm::rotate(glm::mat4(), anguloRotacionRads, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glm::mat4 rotationMatrix = glm::rotate(glm::mat4(), anguloRotacionRads, glm::vec3(0.0f, 1.0f, 0.0f));
+		//
+		//triangleModel.setRotation()
 
 		// La posición varía segun cada objeto.
 		// Se calcula una matriz de traslación distinta para cada objeto
-		for (int x = -3; x <= 3; x += 3) {
+		/*for (int x = -3; x <= 3; x += 3) {
 			for (int z = 0; z >= -6; z -= 3) {
 
 				// Matriz de traslacion
 				glm::mat4 translationMatrix = glm::translate(glm::mat4(), glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
+				//
+				glm::vec3 translationVector = glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z));
+				triangleModel.setPosition(translationVector);
 
 				// Store the needed Matrices in the class State
 				State::modelMatrix = translationMatrix * rotationMatrix;
@@ -171,10 +207,14 @@ int main(int, char**) {
 				State::projectionMatrix = projectionMatrix;
 
 				//Draw the object
-				triangleMesh.draw();
+				//triangleMesh->draw();
+				triangleModel.draw();
 			}
-		}
+		}*/
 
+		// Draw the objects
+		world.update(deltaTime);
+		world.draw();
 
 		// update swap chain & process events
 		glfwSwapBuffers(window);

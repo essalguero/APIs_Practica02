@@ -14,8 +14,27 @@ class Buffer
 {
 public:
 
+	
+	static std::shared_ptr<Buffer> create(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices);
+
+
+	//void draw(const Shader& shader) const;
+	void draw(const std::shared_ptr<Shader> & shader) const;
+
+	// Obtiene el mensaje de error generado al crear el buffer
+	inline const char*	getError() const { return error; };
+
+protected:
+
+	static inline void destroy(Buffer* p) {
+		delete p;
+	}
+
+	~Buffer();
+	
+
 	Buffer(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices) : vertices(vertices), indices(indices) {
-		
+
 		glGenBuffers(2, buffer);
 		if (buffer[0] == 0 || buffer[1] == 0) {
 			std::cout << "could not create buffers" << std::endl;
@@ -35,17 +54,13 @@ public:
 
 	};
 
-	~Buffer();
-
-	//void draw(const Shader& shader) const;
-	void draw(const std::shared_ptr<Shader> & shader) const;
 
 private:
-
 
 	std::vector<Vertex> vertices;
 	std::vector<uint16_t> indices;
 
 	uint32_t buffer[2]{ 0 };
 
+	char error[1024];
 };

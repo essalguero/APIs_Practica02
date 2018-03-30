@@ -5,6 +5,15 @@
 Buffer::~Buffer() {
 	glDeleteBuffers(2, buffer);
 }
+
+std::shared_ptr<Buffer> Buffer::create(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices)
+{
+	std::shared_ptr<Buffer> p(new Buffer(vertices, indices), destroy);
+	if (strcmp(p->error, "") != 0) {
+		p = nullptr;
+	}
+	return p;
+}
  
 /*void Buffer::draw(const Shader& shader) const {
 
