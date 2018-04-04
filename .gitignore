@@ -100,3 +100,5 @@ ugine/vc15/x64/Debug/Entity\.obj
 ugine/vc15/x64/Debug/Model\.obj
 
 ugine/vc15/x64/Debug/World\.obj
+
+*.ipch

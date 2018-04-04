@@ -19,6 +19,7 @@
 #include "Vertex.h"
 #include "Buffer.h"
 #include "Mesh.h"
+#include "Entity.h"
 #include "Model.h"
 #include "Camera.h"
 #include "World.h"
@@ -28,6 +29,7 @@
 #define FULLSCREEN false
 
 const float ROTATION_SPEED = 32.0f;
+const float ROTATION_SPEED_RADS = glm::radians(ROTATION_SPEED);
 
 std::string readString(const char* filename) {
 	std::ifstream f(filename, std::ios_base::binary);
@@ -39,7 +41,6 @@ std::string readString(const char* filename) {
 
 int init() {
 	
-
 	// init glew
 	if (glewInit()) {
 		std::cout << "could not initialize glew" << std::endl;
@@ -53,6 +54,79 @@ int init() {
 
 }
 
+
+int createModelsInWorld(World & world)
+{
+	// Crear el Buffer que contiene los datos de un triángulo
+	vector<Vertex> vertices;
+	vector<uint16_t> indices;
+
+
+	Vertex v1{ glm::vec3(0.0f, 1.0f, 0.0f) };
+	Vertex v2{ glm::vec3(-1.0f, -1.0f, 0.0f) };
+	Vertex v3{ glm::vec3(1.0f, -1.0f, 0.0f) };
+
+	vertices.push_back(v1);
+	vertices.push_back(v2);
+	vertices.push_back(v3);
+
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(2);
+
+
+	shared_ptr<Buffer> bufferDatos = Buffer::create(vertices, indices);
+	if (strcmp(bufferDatos->getError(), "") != 0)
+	{
+		cout << bufferDatos->getError() << endl;
+		return 0;
+	}
+
+	shared_ptr<Mesh> triangleMesh = make_shared<Mesh>();
+	Model triangleModel(triangleMesh);
+	triangleMesh->addBuffer(bufferDatos);
+
+	glm::vec3 scaleVector(1.0f, 1.0f, 1.0f);
+	glm::vec3 rotationVector(0.0f, 0.0f, 0.0f);
+
+	// create the triangles in the scene
+	for (int x = -3; x <= 3; x += 3) {
+		for (int z = 0; z >= -6; z -= 3) {
+
+			shared_ptr<Model> triangle = make_shared<Model>(triangleMesh);
+			triangle->setScale(scaleVector);
+			triangle->setRotation(rotationVector);
+			triangle->setPosition(glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
+
+			world.addEntity(triangle);
+		}
+	}
+
+	return 1;
+}
+
+/*const glm::vec3 getRotationOfModel(const shared_ptr<Model> model)
+{
+	glm::vec3 vectorRotation;
+	glm::quat quaternionRotation;
+
+	vectorRotation = model->getRotation();
+	//quaternionRotation = model->getRotationQuat();
+
+	quaternionRotation.y = radians(32.0f);
+	//quaternionRotation. = vec3(0.0f, 1.0f, 0.0f);
+
+	return vectorRotation;
+}
+
+const glm::quat getQuatRotationOfModel(const shared_ptr<Model> model)
+{
+	glm::quat quaternionRotation;
+
+	quaternionRotation = model->getRotationQuat();
+
+	return quaternionRotation;
+}*/
 
 
 int main(int, char**) {
@@ -80,71 +154,32 @@ int main(int, char**) {
 	// Store the Shader in the global object State
 	State::defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
 
+	// If there  was any erroron the generation of the sharder, raise an error
 	if (strcmp(State::defaultShader->getError(), "") != 0)
 	{
 		cout << State::defaultShader->getError() << endl;
 		return -1;
 	}
 
-	//State::defaultShader->use();
+	// Generate the world
+	World world;
 
-
-	// Crear el Buffer que contiene los datos de un triángulo
-	vector<Vertex> vertices;
-	vector<uint16_t> indices;
-
-
-	Vertex v1{ glm::vec3(0.0f, 1.0f, 0.0f) };
-	Vertex v2{ glm::vec3(-1.0f, -1.0f, 0.0f) };
-	Vertex v3{ glm::vec3(1.0f, -1.0f, 0.0f) };
-
-	vertices.push_back(v1);
-	vertices.push_back(v2);
-	vertices.push_back(v3);
-
-	indices.push_back(0);
-	indices.push_back(1);
-	indices.push_back(2);
-
-
-	shared_ptr<Buffer> bufferDatos = Buffer::create(vertices, indices);
-	if (strcmp(bufferDatos->getError(), "") != 0)
-	{
-		cout << bufferDatos->getError() << endl;
-		return -1;
-	}
-
-	shared_ptr<Mesh> triangleMesh = make_shared<Mesh>();
-	Model triangleModel(triangleMesh);
-	triangleMesh->addBuffer(bufferDatos);
-
+	// Generate a camera and store it in the world
 	shared_ptr<Camera> camera = make_shared<Camera>();
 	camera->setPosition(glm::vec3(0.0f, 0.0f, 6.0f));
 	camera->setClearColor(glm::vec3(0, 0, 0));
-
-	World world;
-	//world.addEntity(std::dynamic_pointer_cast<Entity, Camera>(camera));
 	world.addEntity(camera);
 
-	
-	float anguloRotacionRads = glm::radians(ROTATION_SPEED);
-	glm::vec3 scaleVector(1.0f, 1.0f, 1.0f);
-	glm::vec3 rotationVector(0.0f, 0.0f, 0.0f);
-
-	vector<shared_ptr<Model>> trianglesVector;
-
-	for (int x = -3; x <= 3; x += 3) {
-		for (int z = 0; z >= -6; z -= 3) {
-			
-			shared_ptr<Model> triangle = make_shared<Model>(triangleMesh);
-			triangle->setScale(scaleVector);
-			triangle->setRotation(rotationVector);
-			triangle->setPosition(glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
-
-			world.addEntity(triangle);
-			trianglesVector.push_back(triangle);
-		}
+	// Generate the objects in the world
+	if (!createModelsInWorld(world))
+	{
+		cout << "Error creating the Model objects in the world" << endl;
+		return -1;
 	}
+
+	// create a cuaternion with the  
+	glm::quat rotationQuat = angleAxis(ROTATION_SPEED_RADS,
+		glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Bucle principal
 	float lastTime = static_cast<float>(glfwGetTime());
@@ -171,46 +206,25 @@ int main(int, char**) {
 			static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 		camera->setProjection(projectionMatrix);
 
-		// Rotar todos los triangulos
-		for (auto triangle : trianglesVector)
-		{
-			triangle->setRotation(glm::vec3(0.0f, anguloRotacionRads, 0.0f));
-		}
+		
+		// Update the objects in the world
+		for (int i = 0; i < world.getNumEntities(); ++i) {
 
-		// Crear matriz de vista
-		//glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 6.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			std::shared_ptr<Entity> currentEntity = world.getEntity(i);
 
-		// Transformaciones para calcular la matriz del modelo
+			std::shared_ptr<Model> currentModel = std::dynamic_pointer_cast<Model>(currentEntity);
 
-		// Escala
-		// No se esta realizando escalado de objetos
+			if (currentModel != nullptr)
+			{
+				// get the current quaternion of the object
+				glm::quat rotationQuaternion = currentModel->getRotationQuat();
 
-		// Matriz de Rotacion
-		//glm::mat4 rotationMatrix = glm::rotate(glm::mat4(), anguloRotacionRads, glm::vec3(0.0f, 1.0f, 0.0f));
-		//
-		//triangleModel.setRotation()
 
-		// La posición varía segun cada objeto.
-		// Se calcula una matriz de traslación distinta para cada objeto
-		/*for (int x = -3; x <= 3; x += 3) {
-			for (int z = 0; z >= -6; z -= 3) {
-
-				// Matriz de traslacion
-				glm::mat4 translationMatrix = glm::translate(glm::mat4(), glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
-				//
-				glm::vec3 translationVector = glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z));
-				triangleModel.setPosition(translationVector);
-
-				// Store the needed Matrices in the class State
-				State::modelMatrix = translationMatrix * rotationMatrix;
-				State::viewMatrix = viewMatrix;
-				State::projectionMatrix = projectionMatrix;
-
-				//Draw the object
-				//triangleMesh->draw();
-				triangleModel.draw();
+				currentModel->setRotation(glm::slerp(rotationQuaternion, 
+					rotationQuat * rotationQuaternion, deltaTime));
+				
 			}
-		}*/
+		}
 
 		// Draw the objects
 		world.update(deltaTime);

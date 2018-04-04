@@ -1,5 +1,7 @@
 #include "Entity.h"
 
+#include "iostream"
+
 Entity::Entity()
 {
 
@@ -15,14 +17,26 @@ void Entity::setPosition(const glm::vec3& pos)
 	position = pos;
 }
 
-const glm::vec3& Entity::getRotation() const // puede ser quat
+const glm::vec3& Entity::getRotation() const
 {
 	return rotation;
 }
 
-const void Entity::setRotation(const glm::vec3& rot) // puede ser quat
+const void Entity::setRotation(const glm::vec3& rot) 
 {
 	rotation = rot;
+}
+
+
+
+const glm::quat& Entity::getRotationQuat() const 
+{
+	return glm::quat(rotation);
+}
+
+const void Entity::setRotation(const glm::quat& rot) 
+{
+	rotation = glm::eulerAngles(rot);
 }
 
 const glm::vec3& Entity::getScale() const

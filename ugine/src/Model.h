@@ -11,7 +11,7 @@ public:
 
 	Model(const std::shared_ptr<Mesh>& mesh);
 	virtual void draw() override;
-	virtual void update(float deltaTime) override;
+	//virtual void update(float deltaTime) override;
 	
 
 private:
