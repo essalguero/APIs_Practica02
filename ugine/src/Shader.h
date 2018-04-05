@@ -33,11 +33,9 @@ public:
 	void setVec4(int loc, const glm::vec4& vec);
 	void setMatrix(int loc, const glm::mat4& matrix);
 
-
 	static std::shared_ptr<Shader> create(const std::string& vertexCode, const std::string& fragmentCode);
 
 protected:
-
 
 	Shader(const std::string & stringVertexShader, const std::string & stringFragmentShader);
 	~Shader();

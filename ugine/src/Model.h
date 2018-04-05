@@ -13,7 +13,6 @@ public:
 	virtual void draw() override;
 	//virtual void update(float deltaTime) override;
 	
-
 private:
 	shared_ptr<Mesh> mesh;
 };

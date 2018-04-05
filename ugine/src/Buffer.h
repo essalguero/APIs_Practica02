@@ -14,9 +14,7 @@ class Buffer
 {
 public:
 
-	
 	static std::shared_ptr<Buffer> create(const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices);
-
 
 	//void draw(const Shader& shader) const;
 	void draw(const std::shared_ptr<Shader> & shader) const;

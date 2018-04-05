@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 Shader::~Shader()
 {
 	if (id != -1)
@@ -21,6 +22,7 @@ std::shared_ptr<Shader> Shader::create(const std::string& vertexCode, const std:
 	}
 	return p;
 }
+
 
 // Gets as parameter the code of the shaders to compile
 Shader::Shader(string const & vertexShaderSource, const string & fragmentShaderSource) : error{} {
@@ -92,14 +94,14 @@ void Shader::setupAttribs() const {
 }
 
 
-
-
 void Shader::setInt(int loc, int val) {
 	if (loc != -1)
 	{
 		glUniform1i(loc, val);
 	}
 }
+
+
 void Shader::setFloat(int loc, float val) {
 	if (loc != -1)
 	{
@@ -107,6 +109,8 @@ void Shader::setFloat(int loc, float val) {
 	}
 
 }
+
+
 void Shader::setVec3(int loc, const glm::vec3& vec) {
 	if (loc != -1)
 	{
@@ -114,19 +118,21 @@ void Shader::setVec3(int loc, const glm::vec3& vec) {
 	}
 
 }
+
+
 void Shader::setVec4(int loc, const glm::vec4& vec) {
 	if (loc != -1)
 	{
 		glUniform4f(loc, vec.r, vec.g, vec.b, vec.a);
 	}
-
 }
+
+
 void Shader::setMatrix(int loc, const glm::mat4& matrix) {
 	if (loc != -1)
 	{
 		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(matrix));
 	}
-
 }
 
 

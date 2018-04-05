@@ -28,7 +28,6 @@ const void Entity::setRotation(const glm::vec3& rot)
 }
 
 
-
 const glm::quat& Entity::getRotationQuat() const 
 {
 	return glm::quat(rotation);

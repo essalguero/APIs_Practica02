@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+
 void World::addEntity(const std::shared_ptr<Entity>& entity)
 {
 	std::shared_ptr<Camera> camera = nullptr;
@@ -29,6 +30,7 @@ void World::addEntity(const std::shared_ptr<Entity>& entity)
 		}
 	}
 }
+
 
 void World::removeEntity(const std::shared_ptr<Entity>& entity)
 {
@@ -61,10 +63,12 @@ void World::removeEntity(const std::shared_ptr<Entity>& entity)
 		camerasVector.erase(cameraToDelete);
 }
 
+
 size_t World::getNumEntities() const
 {
 	return entitiesVector.size();
 }
+
 
 const std::shared_ptr<Entity>& World::getEntity(size_t index) const
 {
@@ -77,6 +81,7 @@ const std::shared_ptr<Entity>& World::getEntity(size_t index) const
 	return entity;
 }
 
+
 std::shared_ptr<Entity>& World::getEntity(size_t index)
 {
 	std::shared_ptr<Entity> entity = nullptr;
@@ -88,6 +93,7 @@ std::shared_ptr<Entity>& World::getEntity(size_t index)
 	return entity;
 }
 
+
 void World::update(float deltaTime)
 {
 	for(auto &entity : entitiesVector)
@@ -95,6 +101,7 @@ void World::update(float deltaTime)
 		entity->update(deltaTime);
 	}
 }
+
 
 void World::draw()
 {
