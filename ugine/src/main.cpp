@@ -2,7 +2,6 @@
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
-//#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -55,6 +54,7 @@ int init() {
 }
 
 
+// This method creates all the models and add them to the world
 int createModelsInWorld(World & world)
 {
 	// Crear el Buffer que contiene los datos de un triángulo
@@ -98,35 +98,13 @@ int createModelsInWorld(World & world)
 			triangle->setRotation(rotationVector);
 			triangle->setPosition(glm::vec3(static_cast<float>(x), 0.0f, static_cast<float>(z)));
 
+			//Add them to the world object
 			world.addEntity(triangle);
 		}
 	}
 
 	return 1;
 }
-
-/*const glm::vec3 getRotationOfModel(const shared_ptr<Model> model)
-{
-	glm::vec3 vectorRotation;
-	glm::quat quaternionRotation;
-
-	vectorRotation = model->getRotation();
-	//quaternionRotation = model->getRotationQuat();
-
-	quaternionRotation.y = radians(32.0f);
-	//quaternionRotation. = vec3(0.0f, 1.0f, 0.0f);
-
-	return vectorRotation;
-}
-
-const glm::quat getQuatRotationOfModel(const shared_ptr<Model> model)
-{
-	glm::quat quaternionRotation;
-
-	quaternionRotation = model->getRotationQuat();
-
-	return quaternionRotation;
-}*/
 
 
 int main(int, char**) {
@@ -154,7 +132,7 @@ int main(int, char**) {
 	// Store the Shader in the global object State
 	State::defaultShader = Shader::create(readString("../data/shader.vert"), readString("../data/shader.frag"));
 
-	// If there  was any erroron the generation of the sharder, raise an error
+	// If there  was any error on the generation of the sharder, raise an error
 	if (strcmp(State::defaultShader->getError(), "") != 0)
 	{
 		cout << State::defaultShader->getError() << endl;
@@ -212,14 +190,14 @@ int main(int, char**) {
 
 			std::shared_ptr<Entity> currentEntity = world.getEntity(i);
 
+			//Only Model objects must be displayed
 			std::shared_ptr<Model> currentModel = std::dynamic_pointer_cast<Model>(currentEntity);
-
 			if (currentModel != nullptr)
 			{
 				// get the current quaternion of the object
 				glm::quat rotationQuaternion = currentModel->getRotationQuat();
 
-
+				// Calculate the new quaternion
 				currentModel->setRotation(glm::slerp(rotationQuaternion, 
 					rotationQuat * rotationQuaternion, deltaTime));
 				
